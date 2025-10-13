@@ -1,0 +1,48 @@
+/* Professional full-page image styles with premium transitions */
+.zoomed-out-image {
+  transform: none !important;
+  object-fit: cover !important;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  transition: opacity 1.5s cubic-bezier(0.33, 1, 0.68, 1) !important; /* Premium easing */
+  will-change: opacity, transform; /* Performance optimization */
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+}
+
+/* Premium cross-fade transition effects */
+.embla__container {
+  backface-visibility: hidden !important;
+  transform-style: preserve-3d !important;
+  -webkit-backface-visibility: hidden !important;
+  transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1) !important; /* Premium easing */
+  perspective: 1000px !important; /* 3D space for smoother transitions */
+  will-change: transform !important; /* Hardware acceleration */
+}
+
+/* Professional fade transitions between slides */
+.embla__slide {
+  transform-origin: center center !important;
+  transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1), 
+              opacity 1.2s cubic-bezier(0.22, 1, 0.36, 1) !important;
+  will-change: transform, opacity !important;
+  transform: translateZ(0) !important; /* Force GPU acceleration */
+}
+
+/* Prevent flash during transitions */
+.embla {
+  -webkit-mask-image: -webkit-radial-gradient(white, black) !important;
+  backface-visibility: hidden !important;
+  perspective: 1000px !important;
+}
+
+/* Ensure smooth image rendering during transitions */
+img.slide-image {
+  -webkit-backface-visibility: hidden !important;
+  backface-visibility: hidden !important;
+  -webkit-transform: translateZ(0) !important;
+  transform: translateZ(0) !important;
+  image-rendering: -webkit-optimize-contrast !important;
+  transition: opacity 1.5s cubic-bezier(0.33, 1, 0.68, 1) !important;
+}

@@ -1,0 +1,228 @@
+import { useEffect, useState, useCallback } from "react";
+import useEmblaCarousel from "embla-carousel-react";
+import { ProgressBar } from "@/components/ui/progress-bar";
+import { useIsMobile } from "@/hooks/use-mobile";
+import '../carousel-fix.css';
+import '../components/embla.css';
+
+// Import hero images - selecting the most professional high-quality ones
+import heroImage1 from "@/assets/La Casa images/la casa special drinks.jpg";
+import heroImage2 from "@/assets/La Casa images/pizza photo.jpg";
+import heroImage3 from "@/assets/La Casa images/inside 2.jpg";
+import heroImage4 from "@/assets/La Casa images/la casa infront.jpg";
+import heroImage5 from "@/assets/La Casa images/menu.jpg";
+
+const Hero = () => {
+  // Direct embla carousel integration
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    loop: true,
+    dragFree: false,
+    skipSnaps: false,
+    align: "center"
+  });
+  
+  const [current, setCurrent] = useState(0);
+  const [autoPlay, setAutoPlay] = useState(true);
+  const [progress, setProgress] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [loaded, setLoaded] = useState<boolean[]>(Array(5).fill(false));
+  const isMobile = useIsMobile();
+  
+  // Carousel images
+  const carouselImages = [
+    { src: heroImage1, alt: "La Casa Special Drinks" },
+    { src: heroImage2, alt: "La Casa Pizza Selection" },
+    { src: heroImage3, alt: "La Casa Restaurant Interior" },
+    { src: heroImage4, alt: "La Casa Restaurant Exterior" },
+    { src: heroImage5, alt: "La Casa Menu Selection" },
+  ];
+
+  // Image load handler
+  const handleImageLoad = (index: number) => {
+    const newLoaded = [...loaded];
+    newLoaded[index] = true;
+    setLoaded(newLoaded);
+  };
+
+  // Update current slide index when the carousel scrolls
+  useEffect(() => {
+    if (!emblaApi) return;
+    
+    const onSelect = () => {
+      setCurrent(emblaApi.selectedScrollSnap());
+    };
+    
+    emblaApi.on("select", onSelect);
+    onSelect(); // Set initial slide index
+    
+    return () => {
+      emblaApi.off("select", onSelect);
+    };
+  }, [emblaApi]);
+
+  // Handle auto-scrolling with progress bar
+  useEffect(() => {
+    if (!emblaApi || !autoPlay || isTransitioning) return;
+    
+    let timeoutId: NodeJS.Timeout;
+    const slideDuration = 6000; // 6 seconds between slides
+    
+    // Reset progress and start it from 0
+    setProgress(0);
+    let startTime = Date.now();
+    
+    const updateProgress = () => {
+      if (!autoPlay) return;
+      const elapsed = Date.now() - startTime;
+      const newProgress = Math.min(100, (elapsed / slideDuration) * 100);
+      setProgress(newProgress);
+      
+      if (elapsed < slideDuration && autoPlay) {
+        requestAnimationFrame(updateProgress);
+      }
+    };
+    
+    // Start updating progress
+    requestAnimationFrame(updateProgress);
+    
+    // Set timeout to scroll to next slide
+    timeoutId = setTimeout(() => {
+      if (autoPlay && emblaApi) {
+        setIsTransitioning(true);
+        emblaApi.scrollNext();
+        setTimeout(() => {
+          setIsTransitioning(false);
+        }, 1000);
+      }
+    }, slideDuration);
+    
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [emblaApi, autoPlay, current, isTransitioning]);
+  
+  // Scroll handler for manual controls
+  const handleScroll = useCallback((direction: 'prev' | 'next') => {
+    if (emblaApi && !isTransitioning) {
+      setAutoPlay(false);
+      setIsTransitioning(true);
+      setProgress(0);
+      
+      if (direction === 'prev') {
+        emblaApi.scrollPrev();
+      } else {
+        emblaApi.scrollNext();
+      }
+      
+      // Re-enable autoplay after transition completes
+      setTimeout(() => {
+        setIsTransitioning(false);
+        setAutoPlay(true);
+      }, 1000);
+    }
+  }, [emblaApi, isTransitioning]);
+
+  // Handle dot navigation
+  const scrollToSlide = useCallback((index: number) => {
+    if (emblaApi && !isTransitioning) {
+      setIsTransitioning(true);
+      setAutoPlay(false);
+      emblaApi.scrollTo(index);
+      
+      setTimeout(() => {
+        setIsTransitioning(false);
+        setAutoPlay(true);
+      }, 1000);
+    }
+  }, [emblaApi, isTransitioning]);
+
+  return (
+    <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      {/* Hero Carousel */}
+      <div className="absolute inset-0 z-0">
+        <div className="embla w-full h-full" ref={emblaRef}>
+          <div className="embla__container h-screen">
+            {carouselImages.map((image, index) => (
+              <div key={index} className="embla__slide relative h-full min-w-0 flex-[0_0_100%]">
+                <div className="relative h-full w-full overflow-hidden">
+                  <img
+                    src={image.src}
+                    alt={image.alt}
+                    loading="eager"
+                    onLoad={() => handleImageLoad(index)}
+                    className={`slide-image ${loaded[index] ? 'loaded' : ''}`}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-r from-foreground/40 via-foreground/25 to-foreground/10 pointer-events-none"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          {/* Navigation dots */}
+          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 flex flex-col items-center space-y-3">
+            <div className="flex space-x-4 bg-background/20 px-5 py-2 rounded-full backdrop-blur-md">
+              {carouselImages.map((_, index) => (
+                <button
+                  key={index}
+                  className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                    current === index 
+                      ? "bg-primary scale-125" 
+                      : "bg-background/80 hover:bg-background"
+                  }`}
+                  onClick={() => scrollToSlide(index)}
+                  disabled={isTransitioning}
+                  aria-label={`Go to slide ${index + 1}`}
+                />
+              ))}
+            </div>
+            {current !== undefined && !isTransitioning && (
+              <div className="w-40 h-0.5">
+                <ProgressBar progress={progress} className="bg-background/10" />
+              </div>
+            )}
+          </div>
+          
+          {/* Navigation buttons */}
+          <button 
+            type="button"
+            onClick={() => handleScroll('prev')}
+            disabled={isTransitioning}
+            className={`absolute left-6 top-1/2 -translate-y-1/2 z-20 bg-background/20 hover:bg-background/30 border-0 h-10 w-10 rounded-full shadow-lg flex items-center justify-center cursor-pointer transition-all duration-300 hover:scale-105 backdrop-blur-md ${isTransitioning ? 'opacity-50 cursor-not-allowed' : ''}`}
+            aria-label="Previous slide"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m15 18-6-6 6-6"/>
+            </svg>
+          </button>
+          <button 
+            type="button"
+            onClick={() => handleScroll('next')}
+            disabled={isTransitioning}
+            className={`absolute right-6 top-1/2 -translate-y-1/2 z-20 bg-background/20 hover:bg-background/30 border-0 h-10 w-10 rounded-full shadow-lg flex items-center justify-center cursor-pointer transition-all duration-300 hover:scale-105 backdrop-blur-md ${isTransitioning ? 'opacity-50 cursor-not-allowed' : ''}`}
+            aria-label="Next slide"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m9 18 6-6-6-6"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Content (empty for now) */}
+      <div className="relative z-10 container mx-auto px-4">
+        <div className="animate-fade-in">
+          {/* Empty content area */}
+        </div>
+      </div>
+
+      {/* Scroll indicator */}
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10 animate-bounce">
+        <div className="w-6 h-10 border-2 border-background/50 rounded-full flex justify-center">
+          <div className="w-1 h-3 bg-background/50 rounded-full mt-2"></div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default Hero;

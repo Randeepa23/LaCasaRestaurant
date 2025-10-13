@@ -1,0 +1,124 @@
+@keyframes professionalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(1.03) translateZ(0);
+    filter: brightness(1.2) saturate(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateZ(0);
+    filter: brightness(1) saturate(1);
+  }
+}
+
+@keyframes crossfadeTransition {
+  0% { 
+    opacity: 0;
+    transform: scale(1.03);
+    filter: brightness(1.1) blur(5px);
+  }
+  15% {
+    opacity: 0.5;
+    filter: brightness(1.05) blur(2px);
+  }
+  100% { 
+    opacity: 1;
+    transform: scale(1);
+    filter: brightness(1) blur(0px);
+  }
+}
+
+.hero-carousel .embla__slide {
+  transition: transform 1.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Professional cinema-grade carousel transitions */
+.slide-image {
+  opacity: 0;
+  transition: all 1.5s cubic-bezier(0.22, 1, 0.36, 1) !important; /* Premium easing */
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+  transform: none !important; /* No scaling to fill whole page */
+  filter: brightness(1) contrast(1.05) saturate(1.05) !important;
+}
+
+.slide-image.loaded {
+  opacity: 1 !important;
+  animation: crossfadeTransition 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
+}
+
+.carousel-image {
+  /* Improve image quality */
+  image-rendering: auto;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: transform;
+  transition: opacity 800ms ease;
+  
+  /* Prevent image blur */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+  -moz-backface-visibility: hidden;
+  -moz-transform: translate3d(0, 0, 0);
+  
+  /* Additional image quality improvements */
+  filter: none !important;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+.embla__slide--current .carousel-image {
+  transform: scale(1);
+}
+
+.embla__slide--prev .carousel-image,
+.embla__slide--next .carousel-image {
+  transform: scale(1);
+}
+
+/* Remove any transforms that might cause blur */
+.carousel-image {
+  transform: none !important;
+}
+
+/* Improve image rendering */
+.carousel-image {
+  -ms-interpolation-mode: bicubic;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: optimizeQuality;
+}
+
+/* Smooth animation for carousel controls */
+.hero-carousel button {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.hero-carousel button:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.animate-fade-in {
+  animation: fadeIn 1s ease forwards;
+}
+
+/* Smooth scroll indicator */
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0) translateX(-50%);
+  }
+  40% {
+    transform: translateY(-10px) translateX(-50%);
+  }
+  60% {
+    transform: translateY(-5px) translateX(-50%);
+  }
+}
+
+.animate-bounce {
+  animation: bounce 2s infinite;
+}
